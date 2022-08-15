@@ -5,56 +5,47 @@ import java.util.List;
 import java.util.Optional;
 import java.sql.*;
 
-class DatabaseConnection {
-    private String dataBaseUrl;
-    private String user;
-    private String pass;
-    private Connection connection;
+public class Main {
+    public static void main(String[] args) throws Exception {
+        String dataBaseUrl = "jdbc:postgresql://localhost:5432/postgres";
+        String username = "assignment_1";
+        String pass = "test";
+        DatabaseConnection dbCon = new DatabaseConnection(dataBaseUrl, username, pass);
+        Connection con = dbCon.getConnection();
 
-    DatabaseConnection(){
-        this.dataBaseUrl = "jdbc:postgresql://localhost:5432/postgres";
-        this.user = "assignment_1";
-        this.pass = "test";
-    }
+        try{
+            // add user
+            User user1 = new User("User1", "123456789", "+201155282792", Date.valueOf("1993-08-15"));
+            // User.addUser(user1, con);
 
-    public Connection getConnection(){
-        if (this.connection == null){
-            try {
-                this.connection = DriverManager.getConnection(dataBaseUrl, user, pass);
-            } catch (Exception e){
-                System.out.println("Error: " + e.getMessage() + "!!!!");
+            // get all users
+            List<User> users = getAllUser(con);
+            for(User user: users){
+                System.out.println("Username: " + user.getUsername() + ", Password: " + user.getPassword() + ", Birthdate: " + user.getBirthdate() + ", Phone: " + user.getPhone());
             }
+
+            // get user by phone (unique)
+            getUserByPhone("+201155282790", con).ifPresent(opUser -> System.out.println(opUser.getUsername()));
+
+            // get user by id (unique)
+            System.out.println(getUser(1, con).getUsername());
+
+            User user2 = new User("User11", "123456789", "+201255282795", Date.valueOf("1993-05-15"));
+
+            // update user
+            // updateUser(6, user2, con);
+
+            // delete user
+            // deleteUser(5, con);
+
+        } catch (Exception e){
+            System.out.println("Error: " + e.getMessage() + "!!!!");
+            System.out.println(e.getStackTrace());
+            throw new Exception(e);
         }
-        return this.connection;
-    }
-}
-
-class User {
-    private String username;
-    private String phone;
-    private String password;
-    private Date birthdate;
-
-    public User(String username, String password, String phone, Date birthdate){
-        this.username = username;
-        this.password = password;
-        this.phone = phone;
-        this.birthdate = birthdate;
     }
 
-    public String getUsername(){
-        return this.username;
-    }
-    public String getPassword(){
-        return this.password;
-    }
-    public String getPhone(){
-        return this.phone;
-    }
-    public Date getBirthdate(){
-        return this.birthdate;
-    }
-    public static User addUser(User user, Connection con) throws Exception {
+    private static User addUser(User user, Connection con) throws Exception {
         try{
             String query = "INSERT INTO iti.User(username, password, phone, birthdate) VALUES (?, ?, ?, ?)";
             PreparedStatement st = con.prepareStatement(query);
@@ -69,7 +60,7 @@ class User {
         }
         return user;
     }
-    public static User updateUser(int id ,User user, Connection con) throws Exception {
+    private static User updateUser(int id ,User user, Connection con) throws Exception {
         try{
             String query = "UPDATE iti.User SET username = ?, password = ?, phone = ?, birthdate = ? WHERE id = ?";
             PreparedStatement st = con.prepareStatement(query);
@@ -85,7 +76,7 @@ class User {
         }
         return user;
     }
-    public static boolean deleteUser(int id, Connection con) throws Exception {
+    private static boolean deleteUser(int id, Connection con) throws Exception {
         try{
             String query = "DELETE FROM iti.User WHERE id = ?";
             PreparedStatement st = con.prepareStatement(query);
@@ -101,7 +92,7 @@ class User {
             throw new Exception(e);
         }
     }
-    public static User getUser(int id, Connection con) throws Exception {
+    private static User getUser(int id, Connection con) throws Exception {
         // returns 1 user as id is unique
         try{
             String query = "SELECT * FROM iti.User WHERE id = ?";
@@ -118,7 +109,7 @@ class User {
             throw new Exception(e);
         }
     }
-    public static List<User> getAllUser(Connection con) throws Exception {
+    private static List<User> getAllUser(Connection con) throws Exception {
         List<User> users= new ArrayList<>();
         try {
             Statement st = con.createStatement();
@@ -137,7 +128,7 @@ class User {
         }
         return users;
     }
-    public static Optional<User> getUserByPhone(String phone, Connection con) throws Exception {
+    private static Optional<User> getUserByPhone(String phone, Connection con) throws Exception {
         // returns one user as phone is a unique value
         try{
             String query = "SELECT * FROM iti.User WHERE phone = ?";
@@ -161,44 +152,6 @@ class User {
             return Optional.ofNullable(u);
         } catch (Exception e){
             System.out.println("Error: " + e.getMessage() + "!!!!");
-            throw new Exception(e);
-        }
-    }
-}
-
-public class Main {
-    public static void main(String[] args) throws Exception {
-        DatabaseConnection dbCon = new DatabaseConnection();
-        Connection con = dbCon.getConnection();
-
-        try{
-            // add user
-            User user1 = new User("User1", "123456789", "+201155282792", Date.valueOf("1993-08-15"));
-            // User.addUser(user1, con);
-
-            // get all users
-            List<User> users = User.getAllUser(con);
-            for(User user: users){
-                System.out.println("Username: " + user.getUsername() + ", Password: " + user.getPassword() + ", Birthdate: " + user.getBirthdate() + ", Phone: " + user.getPhone());
-            }
-
-            // get user by phone (unique)
-            User.getUserByPhone("+201155282790", con).ifPresent(opUser -> System.out.println(opUser.getUsername()));
-
-            // get user by id (unique)
-            System.out.println(User.getUser(1, con).getUsername());
-
-            User user2 = new User("User11", "123456789", "+201255282795", Date.valueOf("1993-05-15"));
-
-            // update user
-            // User.updateUser(6, user2, con);
-
-            // delete user
-            // User.deleteUser(5, con);
-
-        } catch (Exception e){
-            System.out.println("Error: " + e.getMessage() + "!!!!");
-            System.out.println(e.getStackTrace());
             throw new Exception(e);
         }
     }

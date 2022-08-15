@@ -7,11 +7,11 @@ import java.sql.*;
 
 public class Main {
     public static void main(String[] args) throws Exception {
-        String dataBaseUrl = "jdbc:postgresql://localhost:5432/postgres";
-        String username = "assignment_1";
-        String pass = "test";
-        DatabaseConnection dbCon = new DatabaseConnection(dataBaseUrl, username, pass);
-        Connection con = dbCon.getConnection();
+        String databaseUrl = "jdbc:postgresql://localhost:5432/postgres";
+        String databaseUsername = "assignment_1";
+        String databasePass = "test";
+        DatabaseConnection connectionPool = new DatabaseConnection(databaseUrl, databaseUsername, databasePass);
+        Connection con = connectionPool.getConnection();
 
         try{
             // add user

@@ -1,28 +1,20 @@
 package org.example;
 
-import java.sql.Connection;
-import java.sql.DriverManager;
+import com.zaxxer.hikari.*;
+import java.sql.*;
 
 public class DatabaseConnection {
-    private final String dataBaseUrl;
-    private final String user;
-    private final String pass;
+    private  HikariConfig config = new HikariConfig();
+    private  HikariDataSource ds;
 
-    DatabaseConnection(String dataBaseUrl, String user, String pass){
-        this.dataBaseUrl = dataBaseUrl;
-        this.user = user;
-        this.pass = pass;
+    DatabaseConnection(String databaseUrl, String user, String pass) {
+        config.setJdbcUrl(databaseUrl);
+        config.setUsername(user);
+        config.setPassword(pass);
+        ds = new HikariDataSource(config);
     }
 
-    public Connection getConnection() throws Exception{
-        Connection connection = null;
-        try {
-            connection = DriverManager.getConnection(this.dataBaseUrl, this.user, this.pass);
-        } catch (Exception e){
-            System.out.println("Error: " + e.getMessage() + "!!!!");
-        } finally {
-            connection.close();
-        }
-        return connection;
+    public Connection getConnection() throws Exception {
+        return ds.getConnection();
     }
 }
